@@ -1,0 +1,28 @@
+import {Model, model, property} from '@loopback/repository';
+
+@model()
+export class Rol extends Model {
+  @property({
+    type: 'string',
+    id: true,
+    generated: true,
+  })
+  _id?: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  nombre: string;
+
+
+  constructor(data?: Partial<Rol>) {
+    super(data);
+  }
+}
+
+export interface RolRelations {
+  // describe navigational properties here
+}
+
+export type RolWithRelations = Rol & RolRelations;
