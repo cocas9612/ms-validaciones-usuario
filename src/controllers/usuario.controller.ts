@@ -12,7 +12,7 @@ import {
   getModelSchemaRef, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
-import {Credenciales, Usuario} from '../models';
+import {CambioCredenciales, Credenciales, RecuperarClave, Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
 import {AdministradorDeClavesService} from '../services';
 
@@ -167,7 +167,68 @@ export class UsuarioController {
         clave: credenciales.clave
       }
     });
+    if(usuario){
+     usuario.clave='';
+    }
     return usuario;
+  }
+
+  @post("/recuperar-clave", {
+    responses: {
+      '200': {
+        description: "Recuperacion de clave de los usuarios"
+      }
+    }
+  })
+  async recuperarClave(
+    @requestBody() credenciales: RecuperarClave
+  ): Promise<Boolean> {
+    let usuario = await this.usuarioRepository.findOne({
+      where: {
+        correo: credenciales.correo
+      }
+    });
+
+    if(usuario){
+let clave=this.servicioClaves.GenerarClaveAleatoria();
+let claveCifrada=this.servicioClaves.CifrarTexto(clave);
+usuario.clave=claveCifrada;
+await this.usuarioRepository.updateById(usuario._id,usuario);
+
+
+return true;
+    }
+    return false;
+  }
+
+  @post("/cambio-clave", {
+    responses: {
+      '200': {
+        description: "Cambio de clave del usuario"
+      }
+    }
+  })
+  async cambiarClave(
+    @requestBody() datos:CambioCredenciales
+  ): Promise<Boolean> {
+    let usuario = await this.usuarioRepository.findById(datos.id);
+    if(usuario){
+
+if(usuario.clave==datos.claveActual){
+
+  usuario.clave=datos.nuevaClave;
+  await this.usuarioRepository.updateById(datos.id,usuario);
+  //enviar al usuario sobre el cambio
+  return true;
+
+}else{
+  return false;
+}
+
+          }
+
+    return false;
+
   }
 
 
