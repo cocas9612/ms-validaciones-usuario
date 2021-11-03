@@ -12,7 +12,7 @@ import {
   getModelSchemaRef, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
-import {Usuario} from '../models';
+import {Credenciales, Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
 import {AdministradorDeClavesService} from '../services';
 
@@ -142,6 +142,8 @@ export class UsuarioController {
     await this.usuarioRepository.replaceById(id, usuario);
   }
 
+
+
   @del('/usuarios/{id}')
   @response(204, {
     description: 'Usuario DELETE success',
@@ -149,4 +151,24 @@ export class UsuarioController {
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.usuarioRepository.deleteById(id);
   }
+  @post("/identificar-usuario", {
+    responses: {
+      '200': {
+        description: "Identificion de usuario"
+      }
+    }
+  })
+  async identificar(
+    @requestBody() credenciales: Credenciales
+  ): Promise<Usuario | null> {
+    let usuario = await this.usuarioRepository.findOne({
+      where: {
+        correo: credenciales.usuario,
+        clave: credenciales.clave
+      }
+    });
+    return usuario;
+  }
+
+
 }
