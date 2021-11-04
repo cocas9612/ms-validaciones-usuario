@@ -41,6 +41,13 @@ export class Usuario extends Entity {
   })
   celular: string;
 
+  @property({
+    type: 'array',
+    itemType: 'string',
+    required: true,
+  })
+  id_rol: string[];
+
   @hasMany(() => Rol, {through: {model: () => UsuarioRol, keyFrom: 'id_usuario', keyTo: 'id_rol'}})
   roles: Rol[];
 
