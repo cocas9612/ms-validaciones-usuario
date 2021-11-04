@@ -13,7 +13,7 @@ import {
   response
 } from '@loopback/rest';
 import {Configuraciones} from '../config/configuraciones';
-import {CambioCredenciales, Credenciales, NotificacionCorreo, RecuperarClave, Usuario} from '../models';
+import {CambioCredenciales, Credenciales, NotificacionCorreo, NotificacionSms, RecuperarClave, Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
 import {AdministradorDeClavesService, NotificacionesService} from '../services';
 
@@ -203,6 +203,11 @@ export class UsuarioController {
       usuario.clave = claveCifrada;
       await this.usuarioRepository.updateById(usuario._id, usuario);
 
+      // consumir el ms de notificaciones
+      let notificacion = new NotificacionSms();
+      notificacion.destino = usuario.celular;
+      notificacion.mensaje = `${Configuraciones.saludo_notificaciones} ${usuario.nombre}${Configuraciones.mensaje_recuperar_clave} ${clave}`;
+      this.servicioNotificaciones.EnviarSms(notificacion);
 
       return true;
     }
